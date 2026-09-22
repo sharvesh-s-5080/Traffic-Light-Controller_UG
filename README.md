@@ -27,68 +27,40 @@ To design and simulate a Traffic Light Controller using Verilog HDL and verify i
 ## Verilog HDL Code
 
 ```verilog
-module traffic_light(
+module traffic_light (
     input clk,
     input reset,
     output reg Red,
     output reg Yellow,
     output reg Green
 );
+    reg [1:0] state;
 
-reg [1:0] state;
-
-parameter RED_STATE    = 2'b00,
-          GREEN_STATE  = 2'b01,
-          YELLOW_STATE = 2'b10;
-
-always @(posedge clk or posedge reset)
-begin
-    if(reset)
-        state <= RED_STATE;
-    else
-    begin
-        case(state)
-            RED_STATE:    state <= GREEN_STATE;
-            GREEN_STATE:  state <= YELLOW_STATE;
-            YELLOW_STATE: state <= RED_STATE;
-            default:      state <= RED_STATE;
-        endcase
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            state <= 2'b00;
+            {Red, Green, Yellow} <= 3'b100; // Red state
+        end else begin
+            case (state)
+                2'b00: begin // Red -> Green
+                    state <= 2'b01;
+                    {Red, Green, Yellow} <= 3'b010;
+                end
+                2'b01: begin // Green -> Yellow
+                    state <= 2'b10;
+                    {Red, Green, Yellow} <= 3'b001;
+                end
+                2'b10: begin // Yellow -> Red
+                    state <= 2'b00;
+                    {Red, Green, Yellow} <= 3'b100;
+                end
+                default: begin
+                    state <= 2'b00;
+                    {Red, Green, Yellow} <= 3'b100;
+                end
+            endcase
+        end
     end
-end
-
-always @(*)
-begin
-    case(state)
-        RED_STATE:
-        begin
-            Red = 1;
-            Yellow = 0;
-            Green = 0;
-        end
-
-        GREEN_STATE:
-        begin
-            Red = 0;
-            Yellow = 0;
-            Green = 1;
-        end
-
-        YELLOW_STATE:
-        begin
-            Red = 0;
-            Yellow = 1;
-            Green = 0;
-        end
-
-        default:
-        begin
-            Red = 1;
-            Yellow = 0;
-            Green = 0;
-        end
-    endcase
-end
-
 endmodule
 ```
 
